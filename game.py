@@ -1,6 +1,7 @@
 import pygame as pg
 from random import randint as rng
 screensize = (1200, 500)
+score = 0
 vel = 5
 width = 1200
 height = 500
@@ -13,15 +14,32 @@ man = pg.image.load(r"man-standing.png")
 all_sprites_list = pg.sprite.Group()
 floorPos = pg.Rect(0, screensize[1] - 25, screensize[0], 25)
 
+pg.init()
 
-pg.display.init()
-
-while not pg.display.get_init:
-    continue
+font = pg.font.Font('freesansbold.ttf', 32)
+text = font.render(str(score), True, 'black')
+text_rect = text.get_rect()
+text_rect[0] = screensize[0] - text_rect[2]
 
 
 screen = pg.display.set_mode(size=screensize)
 
+
+text = font.render('Press E To Start!', True, 'black')
+text_rect = text.get_rect(center=(screensize[0]/2, screensize[1]/2))
+screen.fill('white')
+screen.blit(text, text_rect)
+text_rect[0] = screensize[0] - text_rect[2]
+pg.display.flip()
+
+loading = True
+while loading:
+    for i in pg.event.get():
+        if i.type == pg.QUIT:
+            pg.quit()
+    keys = pg.key.get_pressed()
+    if keys[pg.K_e]:
+        loading = False
 
 def generate_obstacle():
     num = rng(1, 6)
@@ -63,6 +81,10 @@ def update_screen(scrn, spritelist):
     screen.fill(0x87CEEB)
     spritelist.draw(scrn)
     pg.draw.rect(scrn, 0x9b7653, floorPos)
+    text = font.render(str(score), True, 'black', 0x87CEEB)
+    text_rect = text.get_rect()
+    text_rect[0] = screensize[0] - text_rect[2]
+    screen.blit(text, text_rect)
     pg.display.flip()
 
 
@@ -180,7 +202,7 @@ all_sprites_list.add(life3)
 
 Fobs = generate_flying_obstacle()
 Flying_Obstacle = FlyingObstacle(Fobs)
-Flying_Obstacle.rect.x, Flying_Obstacle.rect.y = 0, screensize[1] - 40 - 25 - 100
+Flying_Obstacle.rect.x, Flying_Obstacle.rect.y = 0, screensize[1] - 40 - 25 - 120
 all_sprites_list.add(Flying_Obstacle)
 
 obs = generate_obstacle()
@@ -195,7 +217,8 @@ all_sprites_list.add(player)
 while run:
     update_screen(screen, all_sprites_list)
     pg.time.delay(17)
-
+    score += 1
+    
     Flying_Obstacle.rect.x -= 10
     obstacle.rect.x -= 10
     if detect_collision(player, obstacle, False) == 1:
@@ -264,4 +287,20 @@ while run:
     all_sprites_list.update()
     update_screen(screen, all_sprites_list)
 
-pg.quit()
+
+
+
+text = font.render(f'GAME OVER | You survived {score} updates', True, 'black')
+text_rect = text.get_rect(center=(screensize[0]/2, screensize[1]/2))
+while True:
+    
+    screen.fill('white')
+    screen.blit(text, text_rect)
+    pg.display.flip()
+    for event in pg.event.get():
+    
+        if event.type == pg.QUIT:
+            pg.quit()
+            quit()
+
+        pg.display.update()
